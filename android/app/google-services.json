@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "599637527048",
+    "project_id": "mindorapuzzlequest",
+    "storage_bucket": "mindorapuzzlequest.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:599637527048:android:fd71a7d21617b1a1771fbd",
+        "android_client_info": {
+          "package_name": "com.example.flowfix_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAta3uB0njiXX6QOmZA1tOnH8FN0t0lDKs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
