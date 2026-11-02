@@ -2061,8 +2061,6 @@
 
 
 
-
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
@@ -2336,6 +2334,61 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     SoundManager.playTimedLobbyBGM(); 
   }
 
+
+
+// ==========================================
+  // ACHIEVEMENTS & BADGES DIALOG
+  // ==========================================
+  void _showAchievementsDialog() {
+    SoundManager.playClick();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        title: const Text('Achievements & Badges 🏆', style: TextStyle(color: Color(0xFFF9A826))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _achievementTile('🧠 Master Solver', 'Solve 10 Puzzles', totalPuzzlesSolved >= 10),
+            _achievementTile('🔥 Winning Streak', 'Win 3 Matches in Row', consecutiveWins >= 3),
+            _achievementTile('💰 Wealthy Mind', 'Reach 5,000 Net Worth', netWorth >= 5000),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF9A826)),
+            onPressed: () { SoundManager.playClick(); Navigator.pop(context); },
+            child: const Text('Awesome', style: TextStyle(color: Colors.black)),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _achievementTile(String title, String desc, bool isUnlocked) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10), 
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: isUnlocked ? const Color(0xFF00E676).withOpacity(0.15) : const Color(0xFF2A2A35), 
+        borderRadius: BorderRadius.circular(12), 
+        border: Border.all(color: isUnlocked ? const Color(0xFF00E676) : Colors.transparent)
+      ),
+      child: Row(
+        children: [
+          Icon(isUnlocked ? Icons.verified : Icons.lock, color: isUnlocked ? const Color(0xFF00E676) : Colors.grey, size: 28),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start, 
+            children: [
+              Text(title, style: TextStyle(color: isUnlocked ? Colors.white : Colors.white54, fontWeight: FontWeight.bold)),
+              Text(desc, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
   void _getDeviceCountry() {
     try {
       final locale = ui.PlatformDispatcher.instance.locale;
@@ -2591,40 +2644,253 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  void _showAchievementsDialog() {
+  // ==========================================
+  // NEW FEATURE 1: TROPHY ROOM (অ্যাচিভমেন্ট ও ট্রফি রুম)
+  // ==========================================
+  void _showTrophyRoomDialog() {
     SoundManager.playClick();
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E2E),
-        title: const Text('Achievements & Badges 🏆', style: TextStyle(color: Color(0xFFF9A826))),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _achievementTile('🧠 Master Solver', 'Solve 10 Puzzles', totalPuzzlesSolved >= 10),
-            _achievementTile('🔥 Winning Streak', 'Win 3 Matches in Row', consecutiveWins >= 3),
-            _achievementTile('💰 Wealthy Mind', 'Reach 5,000 Net Worth', netWorth >= 5000),
-          ],
+        title: const Text('🏆 Trophy Room & Showcases', style: TextStyle(color: Color(0xFFF9A826), fontWeight: FontWeight.bold)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              _trophyTile('🥇 Gold Master Trophy', 'Completed 10+ Puzzles without hints', totalPuzzlesSolved >= 5),
+              _trophyTile('⚡ Lightning Reflexes', 'Achieved 3x Fever Win Streak', isFeverActive),
+              _trophyTile('👑 High Roller Trophy', 'Reached Net Worth over 5,000 IQ', netWorth >= 5000),
+              _trophyTile('🛡️ Clan Champion', 'Active member of a verified clan', clanName.isNotEmpty),
+            ],
+          ),
         ),
         actions: [
-          ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF9A826)), onPressed: () { SoundManager.playClick(); Navigator.pop(context); }, child: const Text('Awesome', style: TextStyle(color: Colors.black)))
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF9A826)),
+            onPressed: () { SoundManager.playClick(); Navigator.pop(context); },
+            child: const Text('Close', style: TextStyle(color: Colors.black)),
+          )
         ],
       ),
     );
   }
 
-  Widget _achievementTile(String title, String desc, bool isUnlocked) {
+  Widget _trophyTile(String title, String desc, bool isUnlocked) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(color: isUnlocked ? const Color(0xFF00E676).withOpacity(0.15) : const Color(0xFF2A2A35), borderRadius: BorderRadius.circular(12), border: Border.all(color: isUnlocked ? const Color(0xFF00E676) : Colors.transparent)),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isUnlocked ? const Color(0xFFF9A826).withOpacity(0.15) : const Color(0xFF2A2A35),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isUnlocked ? const Color(0xFFF9A826) : Colors.transparent),
+      ),
       child: Row(
         children: [
-          Icon(isUnlocked ? Icons.verified : Icons.lock, color: isUnlocked ? const Color(0xFF00E676) : Colors.grey, size: 28),
-          const SizedBox(width: 12),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: TextStyle(color: isUnlocked ? Colors.white : Colors.white54, fontWeight: FontWeight.bold)),
-            Text(desc, style: const TextStyle(color: Colors.white38, fontSize: 11)),
-          ]),
+          Icon(isUnlocked ? Icons.emoji_events : Icons.lock_outline, color: isUnlocked ? const Color(0xFFF9A826) : Colors.grey, size: 30),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(color: isUnlocked ? Colors.white : Colors.white54, fontWeight: FontWeight.bold)),
+                Text(desc, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // NEW FEATURE 2: CLAN / GUILD SYSTEM (গিল্ড বা ক্ল্যান সিস্টেম)
+  // ==========================================
+  void _showClanDialog() {
+    SoundManager.playClick();
+    final clanController = TextEditingController(text: clanName);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        title: const Text('🛡️ Guild & Clan Headquarters', style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Create or join a Clan to chat, team up, and compete in tournaments!', style: TextStyle(color: Colors.white70, fontSize: 12)),
+            const SizedBox(height: 15),
+            TextField(
+              controller: clanController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(labelText: 'Clan / Guild Tag Name', labelStyle: TextStyle(color: Colors.white54)),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF)),
+              icon: const Icon(Icons.chat, color: Colors.black),
+              label: const Text('Open Clan Chat', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              onPressed: () {
+                Navigator.pop(context);
+                _showClanChatSheet();
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E676)),
+            onPressed: () async {
+              SoundManager.playClick();
+              setState(() => clanName = clanController.text.trim());
+              await _syncDataToFirebase();
+              if (!context.mounted) return;
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clan updated successfully! 🛡️'), backgroundColor: Colors.green));
+            },
+            child: const Text('Save Clan', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showClanChatSheet() {
+    final msgController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E2E),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Text('💬 Clan Chat (${clanName.isEmpty ? "No Clan" : clanName})', style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 15),
+              Expanded(
+                child: clanName.isEmpty
+                    ? const Center(child: Text('Please join or create a clan first to chat!', style: TextStyle(color: Colors.white54)))
+                    : StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance.collection('clans').doc(clanName).collection('messages').orderBy('timestamp', descending: true).limit(50).snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Color(0xFF00E5FF)));
+                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            return const Center(child: Text('No messages yet. Say hello to your guild!', style: TextStyle(color: Colors.white54)));
+                          }
+                          final docs = snapshot.data!.docs;
+                          return ListView.builder(
+                            reverse: true,
+                            itemCount: docs.length,
+                            itemBuilder: (context, index) {
+                              var data = docs[index].data() as Map<String, dynamic>;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: const Color(0xFF2A2A35), borderRadius: BorderRadius.circular(10)),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(data['sender'] ?? 'Member', style: const TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold, fontSize: 12)),
+                                    const SizedBox(height: 2),
+                                    Text(data['message'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: msgController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(hintText: 'Type guild message...', hintStyle: TextStyle(color: Colors.white54)),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send, color: Color(0xFF00E5FF)),
+                    onPressed: () async {
+                      if (msgController.text.trim().isEmpty || clanName.isEmpty) return;
+                      String msg = msgController.text.trim();
+                      msgController.clear();
+                      await FirebaseFirestore.instance.collection('clans').doc(clanName).collection('messages').add({
+                        'sender': playerName,
+                        'message': msg,
+                        'timestamp': FieldValue.serverTimestamp(),
+                      });
+                    },
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // NEW FEATURE 3: DAILY MISSIONS & BATTLE PASS (ডেইলি মিশন ও ব্যাটল পাস)
+  // ==========================================
+  void _showBattlePassDialog() {
+    SoundManager.playClick();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        title: const Text('🎯 Daily Quests & Battle Pass', style: TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Complete daily puzzle challenges to earn exclusive rewards!', style: TextStyle(color: Colors.white70, fontSize: 12)),
+            const SizedBox(height: 15),
+            _questTile('Solve 3 Puzzles Today', 'Progress: ${totalPuzzlesSolved % 3}/3', totalPuzzlesSolved >= 3),
+            _questTile('Win 1 Multiplayer Battle', 'Progress: $consecutiveWins/1', consecutiveWins >= 1),
+            _questTile('Open a Loot Box', 'Progress: Reward Unlocked', true),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E676)),
+            onPressed: () {
+              SoundManager.playClick();
+              Navigator.pop(context);
+              _updateInventory(1, 1, 200);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Claimed Battle Pass Rewards: +200 IQ & Bonuses! 🎁'), backgroundColor: Colors.green));
+            },
+            child: const Text('Claim Reward', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _questTile(String task, String progress, bool isCompleted) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(color: const Color(0xFF2A2A35), borderRadius: BorderRadius.circular(10)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(task, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(progress, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+            ],
+          ),
+          Icon(isCompleted ? Icons.check_circle : Icons.radio_button_unchecked, color: isCompleted ? Color(0xFF00E676) : Colors.grey),
         ],
       ),
     );
@@ -2651,25 +2917,18 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () async {
               SoundManager.playClick();
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); 
               
               try {
                 User? user = FirebaseAuth.instance.currentUser;
                 if (user != null) {
                   String uid = user.uid;
-
-                  // 1. Delete player document from Firestore
                   await FirebaseFirestore.instance.collection('players').doc(uid).delete();
-
-                  // 2. Delete profile picture from Cloud Storage if exists
                   try {
                     await FirebaseStorage.instance.ref().child('profile_images').child('$uid.jpg').delete();
                   } catch (_) {}
-
-                  // 3. Delete Firebase Auth account
                   await user.delete();
 
-                  // 4. Reset local state
                   setState(() {
                     totalIQ = 0;
                     completedZones = 0;
@@ -2680,7 +2939,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                     playerImageBytes = null;
                   });
 
-                  // Clear local shared preferences
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.clear();
 
@@ -2708,7 +2966,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // Feature: Email, Password & Unique Username Registration / Sign-In Dialog
   void _showEmailAuthDialog() {
     SoundManager.playClick();
     final emailController = TextEditingController();
@@ -2823,7 +3080,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // Feature: Friends System & Direct Invites Dialog with Push Notifications (FCM simulation trigger)
   void _showFriendsDialog() {
     SoundManager.playClick();
     final friendUsernameController = TextEditingController();
@@ -2952,7 +3208,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // Daily Challenge Speedboard (Top 100 Best List & User Rank Display)
   void _showDailyLeaderboard() {
     SoundManager.playClick();
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -3051,7 +3306,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // Global Rich List with Top 100 limit restriction check
   void _showLeaderboard() {
     SoundManager.playClick();
     showModalBottomSheet(
@@ -3336,7 +3590,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     }
   }
 
-  // Feature: Cloud Storage Profile Picture Upload + Account Deletion option inside profile for authenticated users
   void _showProfileDialog() {
     SoundManager.playClick();
     final nameController = TextEditingController(text: playerName);
@@ -3400,7 +3653,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                   TextField(controller: nameController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Username', labelStyle: TextStyle(color: Colors.white54))),
                   if (isChecking) const Padding(padding: EdgeInsets.only(top: 10), child: CircularProgressIndicator(color: Color(0xFF00E676))),
                   
-                  // Delete Account button for authenticated users inside profile dialog
                   if (isLoggedIn) ...[
                     const SizedBox(height: 25),
                     const Divider(color: Colors.white24),
@@ -3412,8 +3664,8 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       onPressed: () {
-                        Navigator.pop(dialogContext); // Close profile dialog
-                        _showDeleteAccountConfirmationDialog(); // Trigger deletion workflow
+                        Navigator.pop(dialogContext);
+                        _showDeleteAccountConfirmationDialog();
                       },
                       icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
                       label: const Text('Delete Account & Data', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
@@ -3499,7 +3751,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
             // Friends System Button
             IconButton(icon: const Icon(Icons.group_add, color: Color(0xFF00E5FF), size: 22), tooltip: 'Friends & Invites', onPressed: _showFriendsDialog),
 
-            // Dynamic Sign In / Sign Out button based on authentication status
+            // Dynamic Sign In / Sign Out button
             IconButton(
               icon: Icon(isLoggedIn ? Icons.logout : Icons.login, color: isLoggedIn ? Colors.redAccent : const Color(0xFF00E5FF), size: 22), 
               tooltip: isLoggedIn ? 'Sign Out' : 'Sign In / Register',
@@ -3569,6 +3821,36 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 15),
+                // ==========================================
+                // QUICK ACCESS FOR NEW FEATURES IN LOBBY
+                // ==========================================
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1C29), side: const BorderSide(color: Color(0xFF00E5FF))),
+                        icon: const Icon(Icons.shield, color: Color(0xFF00E5FF), size: 18),
+                        label: const Text('Clan/Guild', style: TextStyle(color: Colors.white, fontSize: 12)),
+                        onPressed: _showClanDialog,
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1C29), side: const BorderSide(color: Color(0xFF00E676))),
+                        icon: const Icon(Icons.card_giftcard, color: Color(0xFF00E676), size: 18),
+                        label: const Text('Battle Pass', style: TextStyle(color: Colors.white, fontSize: 12)),
+                        onPressed: _showBattlePassDialog,
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1C29), side: const BorderSide(color: Color(0xFFF9A826))),
+                        icon: const Icon(Icons.emoji_events, color: Color(0xFFF9A826), size: 18),
+                        label: const Text('Trophies', style: TextStyle(color: Colors.white, fontSize: 12)),
+                        onPressed: _showTrophyRoomDialog,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 20),
                 Stack(
                   alignment: Alignment.bottomCenter,
@@ -3629,7 +3911,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
         GestureDetector(onTap: _showLeaderboard, child: Container(padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: const Color(0xFF00E5FF).withOpacity(0.1), borderRadius: BorderRadius.circular(15), border: Border.all(color: const Color(0xFF00E5FF))), child: const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Row(children: [Icon(Icons.leaderboard, color: Color(0xFF00E5FF), size: 30), SizedBox(width: 15), Text('Global Leaderboard (Top 100)', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))]), Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16)]))), const SizedBox(height: 20),
         const Text('MULTIPLAYER SERVER 🌐', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5)), const SizedBox(height: 15),
         
-        _modeCard(title: '1v1 Battle', subtitle: 'Bet custom IQ. Winner takes all!', icon: Icons.flash_on, color: Colors.redAccent, mode: GameMode.battle, onTapped: () => _showBetSelectionDialog(GameMode.battle)), 
+        _modeCard(title: 'Live 1v1 PvP Battle', subtitle: 'Enhanced real-time betting & animations!', icon: Icons.flash_on, color: Colors.redAccent, mode: GameMode.battle, onTapped: () => _showBetSelectionDialog(GameMode.battle)), 
         const SizedBox(height: 15),
         _modeCard(title: 'Flow Royale', subtitle: '100 Players Survival Mode', icon: Icons.public, color: Colors.purpleAccent, mode: GameMode.royale, onTapped: () => _startGame(GameMode.royale)), 
         const SizedBox(height: 15),
@@ -3662,7 +3944,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
           } 
         }),
         GestureDetector(onTap: _watchAdForReward, child: Container(padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: const Color(0xFF1A1C29), borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.green)), child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.ondemand_video, color: Colors.green, size: 28), SizedBox(width: 10), Text('WATCH AD FOR +50 IQ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]))), const SizedBox(height: 20),
-        GestureDetector(onTap: _openLootBox, child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFF9A826), Color(0xFFFFB74D)]), borderRadius: BorderRadius.circular(20)), child: const Row(children: [Icon(Icons.card_giftcard, color: Colors.black, size: 50), SizedBox(width: 20), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('MYSTERY LOOT BOX', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)), Text('Cost: 300 IQ', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold))])]))), const SizedBox(height: 30),
+        GestureDetector(onTap: _openLootBox, child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFF9A826), Color(0xFFFFB74D)])), child: const Row(children: [Icon(Icons.card_giftcard, color: Colors.black, size: 50), SizedBox(width: 20), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('MYSTERY LOOT BOX', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)), Text('Cost: 300 IQ', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold))])]))), const SizedBox(height: 30),
         const Text('ISLAND THEMES', style: TextStyle(color: Colors.white54, fontSize: 14, fontWeight: FontWeight.bold)), const SizedBox(height: 10),
         Row(children: [
           Expanded(child: GestureDetector(onTap: () => _setTheme(IslandTheme.nature), child: Container(padding: const EdgeInsets.symmetric(vertical: 15), decoration: BoxDecoration(color: const Color(0xFF1A1C29), borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.green.withOpacity(0.5))), child: const Column(children: [Icon(Icons.park, color: Colors.green, size: 35), SizedBox(height: 5), Text('Nature', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), Text('Free', style: TextStyle(color: Colors.green, fontSize: 10))])))), const SizedBox(width: 10),
