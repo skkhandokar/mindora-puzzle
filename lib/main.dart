@@ -1,3 +1,4 @@
+
 // import 'package:flutter/material.dart';
 // import 'dart:math';
 // import 'dart:async';
@@ -13,7 +14,7 @@
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_storage/firebase_storage.dart'; // Added for Cloud Storage
+// import 'package:firebase_storage/firebase_storage.dart';
 // import 'firebase_options.dart';
 // import 'package:flutter/foundation.dart';
 
@@ -680,7 +681,7 @@
 //     );
 //   }
 
-//   // Feature: Friends System & Direct Invites Dialog
+//   // Feature: Friends System & Direct Invites Dialog with Push Notifications (FCM simulation trigger)
 //   void _showFriendsDialog() {
 //     SoundManager.playClick();
 //     final friendUsernameController = TextEditingController();
@@ -733,7 +734,6 @@
 //                         return;
 //                       }
 
-//                       // Add to friends subcollection
 //                       await FirebaseFirestore.instance.collection('players').doc(user.uid).collection('friends').doc(friendUid).set({
 //                         'friend_uid': friendUid,
 //                         'name': fName,
@@ -780,9 +780,19 @@
 //                                     ]),
 //                                     ElevatedButton(
 //                                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E676)),
-//                                       onPressed: () {
+//                                       onPressed: () async {
+//                                         // FCM Push Notification trigger simulation for 1v1 invite
+//                                         String friendUid = data['friend_uid'];
+//                                         await FirebaseFirestore.instance.collection('notifications').add({
+//                                           'target_uid': friendUid,
+//                                           'title': '1v1 Battle Invite! ⚔️',
+//                                           'body': '$playerName has challenged you to a 1v1 duel!',
+//                                           'timestamp': FieldValue.serverTimestamp(),
+//                                         });
+
 //                                         Navigator.pop(context);
 //                                         _showBetSelectionDialog(GameMode.battle);
+//                                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite sent via Push Notification! 🚀'), backgroundColor: Colors.green));
 //                                       },
 //                                       child: const Text('Invite 1v1', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
 //                                     )
@@ -1263,7 +1273,6 @@
 //                   try {
 //                     User? user = FirebaseAuth.instance.currentUser;
 //                     if (tempImageBytes != null && user != null) {
-//                       // Upload to Firebase Cloud Storage
 //                       Reference ref = FirebaseStorage.instance.ref().child('profile_images').child('${user.uid}.jpg');
 //                       UploadTask uploadTask = ref.putData(tempImageBytes!);
 //                       TaskSnapshot snapshot = await uploadTask;
@@ -2028,6 +2037,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
@@ -2595,6 +2630,84 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
+  // Account Deletion Feature for Authenticated Users (Google Play Compliance)
+  void _showDeleteAccountConfirmationDialog() {
+    SoundManager.playClick();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        title: const Text('Delete Account ⚠️', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+        content: const Text(
+          'Are you sure you want to permanently delete your account and all associated cloud data? This action cannot be undone and your game progress will be wiped.',
+          style: TextStyle(color: Colors.white75, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () { SoundManager.playClick(); Navigator.pop(context); },
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () async {
+              SoundManager.playClick();
+              Navigator.pop(context); // Close dialog
+              
+              try {
+                User? user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  String uid = user.uid;
+
+                  // 1. Delete player document from Firestore
+                  await FirebaseFirestore.instance.collection('players').doc(uid).delete();
+
+                  // 2. Delete profile picture from Cloud Storage if exists
+                  try {
+                    await FirebaseStorage.instance.ref().child('profile_images').child('$uid.jpg').delete();
+                  } catch (_) {}
+
+                  // 3. Delete Firebase Auth account
+                  await user.delete();
+
+                  // 4. Reset local state
+                  setState(() {
+                    totalIQ = 0;
+                    completedZones = 0;
+                    selectedZoneToPlay = 0;
+                    playerName = 'Player';
+                    playerAvatar = '🦸‍♂️';
+                    playerImagePath = '';
+                    playerImageBytes = null;
+                  });
+
+                  // Clear local shared preferences
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.clear();
+
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Account successfully deleted! 🗑️'), backgroundColor: Colors.red),
+                  );
+                }
+              } catch (e) {
+                if (!context.mounted) return;
+                String errStr = e.toString();
+                String msg = 'Failed to delete account. Please re-sign in and try again.';
+                if (errStr.contains('requires-recent-login')) {
+                  msg = 'Security check: Please sign out, sign back in, and then delete your account.';
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(msg), backgroundColor: Colors.red),
+                );
+              }
+            },
+            child: const Text('Delete Permanently', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Feature: Email, Password & Unique Username Registration / Sign-In Dialog
   void _showEmailAuthDialog() {
     SoundManager.playClick();
@@ -2810,7 +2923,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E676)),
                                       onPressed: () async {
-                                        // FCM Push Notification trigger simulation for 1v1 invite
                                         String friendUid = data['friend_uid'];
                                         await FirebaseFirestore.instance.collection('notifications').add({
                                           'target_uid': friendUid,
@@ -3224,12 +3336,13 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     }
   }
 
-  // Feature: Cloud Storage Profile Picture Upload
+  // Feature: Cloud Storage Profile Picture Upload + Account Deletion option inside profile for authenticated users
   void _showProfileDialog() {
     SoundManager.playClick();
     final nameController = TextEditingController(text: playerName);
     String tempAvatar = playerAvatar; String tempImagePath = playerImagePath; Uint8List? tempImageBytes = playerImageBytes;
     bool isChecking = false;
+    bool isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
     showDialog(
       context: context, barrierDismissible: false,
@@ -3285,7 +3398,27 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                   ),
                   const SizedBox(height: 20),
                   TextField(controller: nameController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Username', labelStyle: TextStyle(color: Colors.white54))),
-                  if (isChecking) const Padding(padding: EdgeInsets.only(top: 10), child: CircularProgressIndicator(color: Color(0xFF00E676)))
+                  if (isChecking) const Padding(padding: EdgeInsets.only(top: 10), child: CircularProgressIndicator(color: Color(0xFF00E676))),
+                  
+                  // Delete Account button for authenticated users inside profile dialog
+                  if (isLoggedIn) ...[
+                    const SizedBox(height: 25),
+                    const Divider(color: Colors.white24),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.redAccent,
+                        side: const BorderSide(color: Colors.redAccent),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(dialogContext); // Close profile dialog
+                        _showDeleteAccountConfirmationDialog(); // Trigger deletion workflow
+                      },
+                      icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
+                      label: const Text('Delete Account & Data', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ],
               ),
             ),
