@@ -2640,7 +2640,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
         title: const Text('Delete Account ⚠️', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
         content: const Text(
           'Are you sure you want to permanently delete your account and all associated cloud data? This action cannot be undone and your game progress will be wiped.',
-          style: TextStyle(color: Colors.white75, fontSize: 13),
+          style: TextStyle(color: Colors.white70, fontSize: 13),
         ),
         actions: [
           TextButton(
