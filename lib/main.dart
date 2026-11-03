@@ -2052,15 +2052,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
@@ -2321,11 +2312,12 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
 
   int totalPuzzlesSolved = 0;
   int consecutiveWins = 0;
+  int royaleWins = 0; // Royal Rumble Win Counter
 
   final List<String> avatars = ['🦸‍♂️', '🥷', '🧙‍♂️', '🤖', '🧛', '👽', '🧟', '🕵️'];
   final List<String> mockNames = ["Ninja_X", "ProSniper", "LudoKing", "Shadow", "Alpha_01", "GamerGirl", "Zero", "Ghost"];
 
-  int get netWorth => totalIQ + (assetSilver * 1000) + (assetGold * 5000) + (assetCars * 20000) + (assetHouses * 100000) + (totalPuzzlesSolved * 50);
+  int get netWorth => totalIQ + (assetSilver * 1000) + (assetGold * 5000) + (assetCars * 20000) + (assetHouses * 100000) + (totalPuzzlesSolved * 50) + (royaleWins * 5000);
 
   @override void initState() { 
     super.initState(); 
@@ -2334,11 +2326,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     SoundManager.playTimedLobbyBGM(); 
   }
 
-
-
-// ==========================================
-  // ACHIEVEMENTS & BADGES DIALOG
-  // ==========================================
   void _showAchievementsDialog() {
     SoundManager.playClick();
     showDialog(
@@ -2351,6 +2338,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
           children: [
             _achievementTile('🧠 Master Solver', 'Solve 10 Puzzles', totalPuzzlesSolved >= 10),
             _achievementTile('🔥 Winning Streak', 'Win 3 Matches in Row', consecutiveWins >= 3),
+            _achievementTile('👑 Royale Champion', 'Win 1+ Flow Royale', royaleWins >= 1),
             _achievementTile('💰 Wealthy Mind', 'Reach 5,000 Net Worth', netWorth >= 5000),
           ],
         ),
@@ -2389,6 +2377,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
       ),
     );
   }
+
   void _getDeviceCountry() {
     try {
       final locale = ui.PlatformDispatcher.instance.locale;
@@ -2420,6 +2409,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
             totalIQ = data['net_worth'] ?? 0;
             completedZones = data['completed_zones'] ?? 0;
             selectedZoneToPlay = completedZones;
+            royaleWins = data['royale_wins'] ?? 0;
           });
         }
       } else {
@@ -2427,6 +2417,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
           completedZones = prefs.getInt('saved_zone') ?? 0;
           selectedZoneToPlay = completedZones; 
           totalIQ = prefs.getInt('total_iq') ?? 0;
+          royaleWins = prefs.getInt('royale_wins') ?? 0;
         });
       }
 
@@ -2491,6 +2482,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
         'net_worth': netWorth,
         'completed_zones': completedZones,
         'total_solved': totalPuzzlesSolved,
+        'royale_wins': royaleWins, // Sync Royale Wins
         'asset_silver': assetSilver,
         'asset_gold': assetGold,
         'asset_cars': assetCars,
@@ -2644,9 +2636,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // ==========================================
-  // NEW FEATURE 1: TROPHY ROOM (অ্যাচিভমেন্ট ও ট্রফি রুম)
-  // ==========================================
   void _showTrophyRoomDialog() {
     SoundManager.playClick();
     showDialog(
@@ -2661,7 +2650,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
             children: [
               _trophyTile('🥇 Gold Master Trophy', 'Completed 10+ Puzzles without hints', totalPuzzlesSolved >= 5),
               _trophyTile('⚡ Lightning Reflexes', 'Achieved 3x Fever Win Streak', isFeverActive),
-              _trophyTile('👑 High Roller Trophy', 'Reached Net Worth over 5,000 IQ', netWorth >= 5000),
+              _trophyTile('👑 Flow Royale Wins', 'Won Royale Matches: $royaleWins', royaleWins > 0),
               _trophyTile('🛡️ Clan Champion', 'Active member of a verified clan', clanName.isNotEmpty),
             ],
           ),
@@ -2704,9 +2693,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // ==========================================
-  // NEW FEATURE 2: CLAN / GUILD SYSTEM (গিল্ড বা ক্ল্যান সিস্টেম)
-  // ==========================================
   void _showClanDialog() {
     SoundManager.playClick();
     final clanController = TextEditingController(text: clanName);
@@ -2839,9 +2825,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  // ==========================================
-  // NEW FEATURE 3: DAILY MISSIONS & BATTLE PASS (ডেইলি মিশন ও ব্যাটল পাস)
-  // ==========================================
   void _showBattlePassDialog() {
     SoundManager.playClick();
     showDialog(
@@ -2856,7 +2839,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
             const SizedBox(height: 15),
             _questTile('Solve 3 Puzzles Today', 'Progress: ${totalPuzzlesSolved % 3}/3', totalPuzzlesSolved >= 3),
             _questTile('Win 1 Multiplayer Battle', 'Progress: $consecutiveWins/1', consecutiveWins >= 1),
-            _questTile('Open a Loot Box', 'Progress: Reward Unlocked', true),
+            _questTile('Open a Loot Box', 'Progress: Completed', true),
           ],
         ),
         actions: [
@@ -2890,13 +2873,12 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
               Text(progress, style: const TextStyle(color: Colors.white54, fontSize: 11)),
             ],
           ),
-          Icon(isCompleted ? Icons.check_circle : Icons.radio_button_unchecked, color: isCompleted ? Color(0xFF00E676) : Colors.grey),
+          Icon(isCompleted ? Icons.check_circle : Icons.radio_button_unchecked, color: isCompleted ? const Color(0xFF00E676) : Colors.grey),
         ],
       ),
     );
   }
 
-  // Account Deletion Feature for Authenticated Users (Google Play Compliance)
   void _showDeleteAccountConfirmationDialog() {
     SoundManager.playClick();
     showDialog(
@@ -2937,6 +2919,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                     playerAvatar = '🦸‍♂️';
                     playerImagePath = '';
                     playerImageBytes = null;
+                    royaleWins = 0;
                   });
 
                   final prefs = await SharedPreferences.getInstance();
@@ -3033,6 +3016,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                       totalIQ = 0;
                       completedZones = 0;
                       selectedZoneToPlay = 0;
+                      royaleWins = 0;
                     });
                     await _syncDataToFirebase();
                   } else {
@@ -3048,6 +3032,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                         totalIQ = data['net_worth'] ?? 0;
                         completedZones = data['completed_zones'] ?? 0;
                         selectedZoneToPlay = completedZones;
+                        royaleWins = data['royale_wins'] ?? 0;
                       });
                     }
                   }
@@ -3306,6 +3291,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
+  // Global Rich List sorted primarily by Royale Wins, then Net Worth
   void _showLeaderboard() {
     SoundManager.playClick();
     showModalBottomSheet(
@@ -3315,15 +3301,17 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
         height: MediaQuery.of(context).size.height * 0.7, padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Text('Global Rich List (Top 100) 🌍💰', style: TextStyle(color: Color(0xFF00E5FF), fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Global Leaderboard (Top 100) 🌍🏆', style: TextStyle(color: Color(0xFF00E5FF), fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 5),
+            const Text('Ranked by Royale Wins 👑 & Net Worth 💰', style: TextStyle(color: Colors.white54, fontSize: 11)),
             const SizedBox(height: 10),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('players').orderBy('net_worth', descending: true).limit(100).snapshots(),
+                stream: FirebaseFirestore.instance.collection('players').orderBy('royale_wins', descending: true).orderBy('net_worth', descending: true).limit(100).snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: Color(0xFF00E5FF)));
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return ListView(children: [_buildRankRow(1, 'Elon_Mask', 2500000, false, '🇺🇸', 'US', '🦸‍♂️', '', {})]);
+                    return ListView(children: [_buildRankRow(1, 'Elon_Mask', 2500000, 0, false, '🇺🇸', 'US', '🦸‍♂️', '', {})]);
                   }
                   final docs = snapshot.data!.docs;
                   return ListView.builder(
@@ -3335,6 +3323,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                         index + 1, 
                         data['name'] ?? '', 
                         data['net_worth'] ?? 0, 
+                        data['royale_wins'] ?? 0, 
                         isMe, 
                         data['flag'] ?? '🌐', 
                         data['country'] ?? 'UN', 
@@ -3353,7 +3342,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
     );
   }
 
-  Widget _buildRankRow(int rank, String name, int score, bool isMe, String flag, String country, String avatar, String imgPath, Map<String, dynamic> extraData) {
+  Widget _buildRankRow(int rank, String name, int score, int rWins, bool isMe, String flag, String country, String avatar, String imgPath, Map<String, dynamic> extraData) {
     int silver = extraData['asset_silver'] ?? 0;
     int gold = extraData['asset_gold'] ?? 0;
     int cars = extraData['asset_cars'] ?? 0;
@@ -3374,7 +3363,13 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                 Text(flag), const SizedBox(width: 5), Text(avatar, style: const TextStyle(fontSize: 18)), const SizedBox(width: 8),
                 Text(name, style: TextStyle(color: isMe ? const Color(0xFF00E5FF) : Colors.white, fontWeight: FontWeight.bold)),
               ]),
-              Text('Net Worth: \$$score', style: const TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('👑 Royale Wins: $rWins', style: const TextStyle(color: Color(0xFFF9A826), fontWeight: FontWeight.bold, fontSize: 12)),
+                  Text('Net Worth: \$$score', style: const TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold, fontSize: 11)),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -3580,6 +3575,12 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
       } else if (mode == GameMode.dailyChallenge && result['iq'] > 0) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('last_daily_date', DateTime.now().toIso8601String().substring(0, 10));
+      } else if (mode == GameMode.royale && result['iq'] > 0) {
+        // Royal Rumble Win Recorded
+        setState(() => royaleWins++);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('royale_wins', royaleWins);
+        _syncDataToFirebase();
       } else if (!isPractice && (mode == GameMode.single || mode == GameMode.hardcore)) {
         if(result['iq'] < 0) {
           _updateInventory(0, 0, result['iq']); 
@@ -3763,6 +3764,7 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                     completedZones = 0;
                     selectedZoneToPlay = 0;
                     playerName = 'Player';
+                    royaleWins = 0;
                   });
                   _loadProgress();
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully signed out! 🔒'), backgroundColor: Colors.orange));
@@ -3822,9 +3824,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                // ==========================================
-                // QUICK ACCESS FOR NEW FEATURES IN LOBBY
-                // ==========================================
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -3835,12 +3834,6 @@ class _MainLobbyScreenState extends State<MainLobbyScreen> {
                         icon: const Icon(Icons.shield, color: Color(0xFF00E5FF), size: 18),
                         label: const Text('Clan/Guild', style: TextStyle(color: Colors.white, fontSize: 12)),
                         onPressed: _showClanDialog,
-                      ),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1C29), side: const BorderSide(color: Color(0xFF00E676))),
-                        icon: const Icon(Icons.card_giftcard, color: Color(0xFF00E676), size: 18),
-                        label: const Text('Battle Pass', style: TextStyle(color: Colors.white, fontSize: 12)),
-                        onPressed: _showBattlePassDialog,
                       ),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1C29), side: const BorderSide(color: Color(0xFFF9A826))),
@@ -4148,12 +4141,20 @@ class _GameScreenState extends State<GameScreen> {
     _multiplayerSimTimer = Timer.periodic(const Duration(seconds: 3), (timer) { 
       if (isSolved) { timer.cancel(); return; } 
       setState(() { 
-        if (playersAlive > 2) {
+        if (playersAlive > 1) {
           playersAlive -= Random().nextInt(5) + 1; 
+          if (playersAlive < 1) playersAlive = 1;
           String dead = killNames[Random().nextInt(killNames.length)];
           String killer = killNames[Random().nextInt(killNames.length)];
           currentKillfeed = "🔫 $killer eliminated $dead";
-        } else if (playersAlive == 2) { currentKillfeed = "🔥 1 VS 1 - CLUTCH TIME! 🔥"; }
+        } else if (playersAlive == 1) { 
+          currentKillfeed = "🔥 YOU SURVIVED & WON ROYALE! 🔥"; 
+          isSolved = true; 
+          timer.cancel(); 
+          _timer?.cancel();
+          SoundManager.playWin(); 
+          _showWinDialog();
+        }
       }); 
     }); 
   }
@@ -4323,7 +4324,7 @@ class _GameScreenState extends State<GameScreen> {
       } catch (_) {}
     }
 
-    int baseIQ = widget.mode == GameMode.battle ? widget.betAmount * 2 : (widget.mode == GameMode.royale ? 500 : (widget.mode == GameMode.dailyChallenge ? 300 : 150));
+    int baseIQ = widget.mode == GameMode.battle ? widget.betAmount * 2 : (widget.mode == GameMode.royale ? 1000 : (widget.mode == GameMode.dailyChallenge ? 300 : 150));
     int movePenaltyOrBonus = max(10, 50 - (moves * 2)); 
     calculatedIQ = baseIQ + movePenaltyOrBonus;
 
@@ -4331,7 +4332,7 @@ class _GameScreenState extends State<GameScreen> {
     if (goldenCollected && !widget.isPracticeMode) calculatedIQ += 100;
     if (widget.isFeverActive) calculatedIQ = calculatedIQ * 3;
 
-    String winTitle = widget.mode == GameMode.battle ? 'YOU WON THE ${widget.betAmount * 2} IQ POT! 🏆' : (widget.isFeverActive ? '🔥 FEVER CLEARED! 3X IQ' : 'VICTORY! ⚡');
+    String winTitle = widget.mode == GameMode.royale ? '👑 ROYALE CHAMPION! 👑' : (widget.mode == GameMode.battle ? 'YOU WON THE ${widget.betAmount * 2} IQ POT! 🏆' : (widget.isFeverActive ? '🔥 FEVER CLEARED! 3X IQ' : 'VICTORY! ⚡'));
 
     Future.delayed(const Duration(milliseconds: 600), () {
       showDialog(
@@ -4343,6 +4344,7 @@ class _GameScreenState extends State<GameScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Level: ${widget.levelIndex + 1} | Moves: $moves | Time left: ${timeLeft}s', style: const TextStyle(color: Colors.white70)),
+              if (widget.mode == GameMode.royale) const Text('👑 Flow Royale Crown Earned!', style: TextStyle(color: Color(0xFFF9A826), fontWeight: FontWeight.bold)),
               if (widget.activePet == 1) const Text('🐲 Dragon Bonus: +10% IQ', style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
               if (goldenCollected) const Text('🎁 Golden Airdrop: +100 IQ!', style: TextStyle(color: Color(0xFFF9A826), fontWeight: FontWeight.bold)),
               const SizedBox(height: 15),
