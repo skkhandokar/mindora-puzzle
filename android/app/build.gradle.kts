@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -21,8 +22,7 @@ if (keyPropsFileInAndroid.exists()) {
 }
 
 android {
-    // এখানে namespace এবং applicationId দুটোই এক করা হয়েছে
-    namespace = "com.example.flowfix_game"
+    namespace = "com.skkhandokar.mindora"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -37,23 +37,17 @@ android {
         }
     }
 
-   signingConfigs {
-    create("release") {
-        val keystorePropertiesFile = rootProject.file("key.properties")
-        if (keystorePropertiesFile.exists()) {
-            val properties = java.util.Properties()
-            properties.load(java.io.FileInputStream(keystorePropertiesFile))
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storePassword = keystoreProperties.getProperty("storePassword")
             
-            keyAlias = properties.getProperty("keyAlias")
-            keyPassword = properties.getProperty("keyPassword")
-            storePassword = properties.getProperty("storePassword")
-            
-            val storeFileName = properties.getProperty("storeFile")
+            val storeFileName = keystoreProperties.getProperty("storeFile")
             if (storeFileName != null) {
-                // এটি প্রজেক্টের বিভিন্ন সম্ভাব্য লোকেশনে কি-স্টোর ফাইলটি খুঁজে নেবে
                 val fileInApp = file(storeFileName)
-                val fileInAndroidDir = java.io.File(rootProject.projectDir, "app/$storeFileName")
-                val fileInAndroidRoot = java.io.File(rootProject.projectDir, "$storeFileName")
+                val fileInAndroidDir = File(rootProject.projectDir, "app/$storeFileName")
+                val fileInAndroidRoot = File(rootProject.projectDir, "$storeFileName")
                 
                 if (fileInApp.exists()) {
                     storeFile = fileInApp
@@ -65,10 +59,9 @@ android {
             }
         }
     }
-}
 
     defaultConfig {
-        applicationId = "com.example.flowfix_game"
+        applicationId = "com.skkhandokar.mindora"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
