@@ -37,28 +37,37 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-            storePassword = keystoreProperties.getProperty("storePassword")
+
+signingConfigs {
+    create("release") {
+        val keystorePropertiesFile = rootProject.file("android/app/key.properties")
+        val altKeystorePropertiesFile = rootProject.file("key.properties")
+        
+        val propFile = if (keystorePropertiesFile.exists()) keystorePropertiesFile else altKeystorePropertiesFile
+        
+        if (propFile.exists()) {
+            val properties = java.util.Properties()
+            properties.load(java.io.FileInputStream(propFile))
             
-            val storeFileName = keystoreProperties.getProperty("storeFile")
+            keyAlias = properties.getProperty("keyAlias")
+            keyPassword = properties.getProperty("keyPassword")
+            storePassword = properties.getProperty("storePassword")
+            
+            val storeFileName = properties.getProperty("storeFile")
             if (storeFileName != null) {
-                val fileInApp = file(storeFileName)
-                val fileInAndroidDir = File(rootProject.projectDir, "app/$storeFileName")
-                val fileInAndroidRoot = File(rootProject.projectDir, "$storeFileName")
+                // android/app/ folder theke jks file ti load korche
+                val jksFileInApp = java.io.File(rootProject.projectDir, "app/$storeFileName")
+                val jksFileInAndroid = java.io.File(rootProject.projectDir, storeFileName)
                 
-                if (fileInApp.exists()) {
-                    storeFile = fileInApp
-                } else if (fileInAndroidDir.exists()) {
-                    storeFile = fileInAndroidDir
-                } else if (fileInAndroidRoot.exists()) {
-                    storeFile = fileInAndroidRoot
+                if (jksFileInApp.exists()) {
+                    storeFile = jksFileInApp
+                } else if (jksFileInAndroid.exists()) {
+                    storeFile = jksFileInAndroid
                 }
             }
         }
     }
+}
 
     defaultConfig {
         applicationId = "com.example.flowfix_game"
