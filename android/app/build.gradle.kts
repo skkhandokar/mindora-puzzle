@@ -37,20 +37,35 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
+   signingConfigs {
+    create("release") {
+        val keystorePropertiesFile = rootProject.file("key.properties")
+        if (keystorePropertiesFile.exists()) {
+            val properties = java.util.Properties()
+            properties.load(java.io.FileInputStream(keystorePropertiesFile))
             
-            storeFile = keystoreProperties.getProperty("storeFile")?.let { fileName ->
-                val fileInAndroid = rootProject.file("android/$fileName")
-                val fileInRoot = rootProject.file(fileName)
-                if (fileInAndroid.exists()) fileInAndroid else fileInRoot
+            keyAlias = properties.getProperty("keyAlias")
+            keyPassword = properties.getProperty("keyPassword")
+            storePassword = properties.getProperty("storePassword")
+            
+            val storeFileName = properties.getProperty("storeFile")
+            if (storeFileName != null) {
+                // এটি প্রজেক্টের বিভিন্ন সম্ভাব্য লোকেশনে কি-স্টোর ফাইলটি খুঁজে নেবে
+                val fileInApp = file(storeFileName)
+                val fileInAndroidDir = java.io.File(rootProject.projectDir, "app/$storeFileName")
+                val fileInAndroidRoot = java.io.File(rootProject.projectDir, "$storeFileName")
+                
+                if (fileInApp.exists()) {
+                    storeFile = fileInApp
+                } else if (fileInAndroidDir.exists()) {
+                    storeFile = fileInAndroidDir
+                } else if (fileInAndroidRoot.exists()) {
+                    storeFile = fileInAndroidRoot
+                }
             }
-            
-            storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
+}
 
     defaultConfig {
         applicationId = "com.example.flowfix_game"
