@@ -25,6 +25,28 @@ android {
         }
     }
 
+
+     signingConfigs {
+        release {
+            if (project.hasProperty('MY_UPLOAD_STORE_FILE')) {
+                storeFile file(MY_UPLOAD_STORE_FILE)
+                storePassword MY_UPLOAD_STORE_PASSWORD
+                keyAlias MY_UPLOAD_KEY_ALIAS
+                keyPassword MY_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+
+    
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+
+        }
+    }
+}
+
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.flowfix_game"
