@@ -30,8 +30,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    // পুরনো kotlinOptions এর বদলে এই নতুন ব্লকটি দিন
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     signingConfigs {
@@ -50,7 +53,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.flowfix_game"
+        applicationId = "com.skkhandokar.mindora"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -62,7 +65,6 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            
             isMinifyEnabled = false
             isShrinkResources = false
 
