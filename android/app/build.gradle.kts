@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -36,13 +39,16 @@ android {
         create("release") {
             val keystorePropertiesFile = rootProject.file("key.properties")
             if (keystorePropertiesFile.exists()) {
-                val properties = java.util.Properties()
-                properties.load(java.io.FileInputStream(keystorePropertiesFile))
+                val properties = Properties()
+                properties.load(FileInputStream(keystorePropertiesFile))
                 
                 keyAlias = properties.getProperty("keyAlias")
                 keyPassword = properties.getProperty("keyPassword")
                 storePassword = properties.getProperty("storePassword")
-                storeFile = properties.getProperty("storeFile")?.let { file(it) }
+                val storeFilePath = properties.getProperty("storeFile")
+                if (storeFilePath != null) {
+                    storeFile = file(storeFilePath)
+                }
             }
         }
     }
