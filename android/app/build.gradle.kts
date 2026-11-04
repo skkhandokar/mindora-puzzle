@@ -22,7 +22,7 @@ if (keyPropsFileInAndroid.exists()) {
 }
 
 android {
-    namespace = "com.skkhandokar.mindora"
+    namespace = "com.example.flowfix_game"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -61,7 +61,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.skkhandokar.mindora"
+        applicationId = "com.example.flowfix_game"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
