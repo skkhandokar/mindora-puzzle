@@ -18,51 +18,40 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // Updated to fix the Kotlin jvmTarget DSL error
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
-
-     signingConfigs {
-        release {
-            if (project.hasProperty('MY_UPLOAD_STORE_FILE')) {
-                storeFile file(MY_UPLOAD_STORE_FILE)
-                storePassword MY_UPLOAD_STORE_PASSWORD
-                keyAlias MY_UPLOAD_KEY_ALIAS
-                keyPassword MY_UPLOAD_KEY_PASSWORD
-            }
-        }
-    }
-
-    
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-
-        }
-    }
-}
-
-
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.flowfix_game"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePropertiesFile = rootProject.file("key.properties")
+            if (keystorePropertiesFile.exists()) {
+                val properties = java.util.Properties()
+                properties.load(java.io.FileInputStream(keystorePropertiesFile))
+                
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+                storePassword = properties.getProperty("storePassword")
+                storeFile = properties.getProperty("storeFile")?.let { file(it) }
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
