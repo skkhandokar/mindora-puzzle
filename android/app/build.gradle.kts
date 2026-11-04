@@ -21,7 +21,8 @@ if (keyPropsFileInAndroid.exists()) {
 }
 
 android {
-    namespace = "com.example.flowfix_game"
+    // এখানে namespace এবং applicationId দুটোই এক করা হয়েছে
+    namespace = "com.skkhandokar.mindora"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -30,7 +31,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // পুরনো kotlinOptions এর বদলে এই নতুন ব্লকটি দিন
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
