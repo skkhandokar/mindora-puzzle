@@ -1,5 +1,5 @@
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -7,23 +7,45 @@ plugins {
     id("com.google.gms.google-services")
     // END: FlutterFire Configuration
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val keystoreProperties = Properties()
+val keyPropsFileInAndroid = rootProject.file("android/key.properties")
+val keyPropsFileInRoot = rootProject.file("key.properties")
+
+if (keyPropsFileInAndroid.exists()) {
+    keystoreProperties.load(FileInputStream(keyPropsFileInAndroid))
+} else if (keyPropsFileInRoot.exists()) {
+    keystoreProperties.load(FileInputStream(keyPropsFileInRoot))
 }
 
 android {
     namespace = "com.example.flowfix_game"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { fileName ->
+                val fileInAndroid = rootProject.file("android/$fileName")
+                val fileInRoot = rootProject.file(fileName)
+                if (fileInAndroid.exists()) fileInAndroid else fileInRoot
+            }
+            
+            storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
 
@@ -33,31 +55,21 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-    }
 
-    signingConfigs {
-        create("release") {
-            val keystorePropertiesFile = rootProject.file("key.properties")
-            if (keystorePropertiesFile.exists()) {
-                val properties = Properties()
-                properties.load(FileInputStream(keystorePropertiesFile))
-                
-                keyAlias = properties.getProperty("keyAlias")
-                keyPassword = properties.getProperty("keyPassword")
-                storePassword = properties.getProperty("storePassword")
-                val storeFilePath = properties.getProperty("storeFile")
-                if (storeFilePath != null) {
-                    storeFile = file(storeFilePath)
-                }
-            }
-        }
+        multiDexEnabled = true
     }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            
             isMinifyEnabled = false
             isShrinkResources = false
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
