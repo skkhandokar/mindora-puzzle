@@ -30,14 +30,14 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/key.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/mindora-release-key.jks
 
       - name: Create key.properties
         run: |
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/app/key.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" > android/app/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/key.properties
-          echo "storeFile=key.jks" >> android/app/key.properties
+          echo "storeFile=mindora-release-key.jks" >> android/app/key.properties
 
       - name: Build App Bundle (.aab)
         run: flutter build appbundle --release
