@@ -37,35 +37,22 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release") {
-            val keystorePropertiesFile = rootProject.file("android/app/key.properties")
-            val altKeystorePropertiesFile = rootProject.file("key.properties")
+   signingConfigs {
+    create("release") {
+        val keystorePropertiesFile = rootProject.file("android/app/key.properties")
+        if (keystorePropertiesFile.exists()) {
+            val properties = java.util.Properties()
+            properties.load(java.io.FileInputStream(keystorePropertiesFile))
             
-            val propFile = if (keystorePropertiesFile.exists()) keystorePropertiesFile else altKeystorePropertiesFile
+            keyAlias = properties.getProperty("keyAlias")
+            keyPassword = properties.getProperty("keyPassword")
+            storePassword = properties.getProperty("storePassword")
             
-            if (propFile.exists()) {
-                val properties = Properties()
-                properties.load(FileInputStream(propFile))
-                
-                keyAlias = properties.getProperty("keyAlias")
-                keyPassword = properties.getProperty("keyPassword")
-                storePassword = properties.getProperty("storePassword")
-                
-                val storeFileName = properties.getProperty("storeFile")
-                if (storeFileName != null) {
-                    val jksFileInApp = File(rootProject.projectDir, "app/$storeFileName")
-                    val jksFileInAndroid = File(rootProject.projectDir, storeFileName)
-                    
-                    if (jksFileInApp.exists()) {
-                        storeFile = jksFileInApp
-                    } else if (jksFileInAndroid.exists()) {
-                        storeFile = jksFileInAndroid
-                    }
-                }
-            }
+            // সরাসরি android/app ফোল্ডার থেকে কি-স্টোর ফাইলটি নির্ধারণ করে দেওয়া
+            storeFile = file("mindora-release-key.jks")
         }
     }
+}
 
     defaultConfig {
         applicationId = "com.example.flowfix_game"
