@@ -28,12 +28,12 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Decode Keystore
+      - name: Generate Keystore and key.properties
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/mindora-release-key.jks
-
-      - name: Create key.properties
-        run: |
+          # সরাসরি GitHub Actions-এর ভেতরেই ফ্রেশ রিলিজ কি-স্টোর জেনারেট করা
+          keytool -genkey -v -keystore android/app/mindora-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias ${{ secrets.KEY_ALIAS }} -keypass ${{ secrets.KEY_PASSWORD }} -storepass ${{ secrets.STORE_PASSWORD }} -dname "CN=Android, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=US"
+          
+          # key.properties ফাইল তৈরি করা
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/app/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/key.properties
