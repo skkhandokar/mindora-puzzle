@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.flowfix_game"
+    namespace = "com.skkhandokar.mindora"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -57,7 +57,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.flowfix_game"
+        applicationId = "com.skkhandokar.mindora"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
