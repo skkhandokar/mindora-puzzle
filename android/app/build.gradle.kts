@@ -27,17 +27,32 @@ android {
         }
     }
 
-    signingConfigs {
+  signingConfigs {
         create("release") {
-            val keystorePropertiesFile = rootProject.file("android/app/key.properties")
-            if (keystorePropertiesFile.exists()) {
-                val properties = Properties()
-                properties.load(FileInputStream(keystorePropertiesFile))
+            val keystorePropertiesFile = rootProject.file("app/key.properties")
+            val altKeystoreFile = rootProject.file("key.properties")
+            
+            val propFile = if (keystorePropertiesFile.exists()) keystorePropertiesFile else altKeystoreFile
+            
+            if (propFile.exists()) {
+                val properties = java.util.Properties()
+                properties.load(java.io.FileInputStream(propFile))
                 
                 keyAlias = properties.getProperty("keyAlias")
                 keyPassword = properties.getProperty("keyPassword")
                 storePassword = properties.getProperty("storePassword")
-                storeFile = file("android/app/mindora-release-key.jks")
+                
+                val storeFileName = properties.getProperty("storeFile") ?: "mindora-release-key.jks"
+                
+                // GitHub Actions এবং লোকাল দুই জায়গার জন্যই সুনির্দিষ্ট পাথ চেক করা
+                val fileInApp = file(storeFileName)
+                val fileInAndroidApp = java.io.File(rootProject.projectDir, "app/$storeFileName")
+                
+                if (fileInApp.exists()) {
+                    storeFile = fileInApp
+                } else if (fileInAndroidApp.exists()) {
+                    storeFile = fileInAndroidApp
+                }
             }
         }
     }
