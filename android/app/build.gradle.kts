@@ -27,7 +27,7 @@ android {
         }
     }
 
- signingConfigs {
+    signingConfigs {
         create("release") {
             val keystorePropertiesFile = rootProject.file("app/key.properties")
             val altKeystoreFile = rootProject.file("key.properties")
@@ -35,7 +35,6 @@ android {
             val propFile = if (keystorePropertiesFile.exists()) keystorePropertiesFile else altKeystoreFile
             
             if (propFile.exists()) {
-                // সরাসরি Properties ক্লাস ব্যবহার করা হলো (java.util. লেখা লাগবে না)
                 val properties = Properties()
                 properties.load(FileInputStream(propFile))
                 
@@ -45,7 +44,6 @@ android {
                 
                 val storeFileName = properties.getProperty("storeFile") ?: "mindora-release-key.jks"
                 
-                // সরাসরি File ক্লাস ব্যবহার করা হলো (java.io. লেখা লাগবে না)
                 val fileInApp = file(storeFileName)
                 val fileInAndroidApp = File(rootProject.projectDir, "app/$storeFileName")
                 
@@ -57,6 +55,30 @@ android {
             }
         }
     }
+
+    defaultConfig {
+        applicationId = "com.example.flowfix_game"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        multiDexEnabled = true
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+}
 
 flutter {
     source = "../.."
