@@ -11,16 +11,6 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val keystoreProperties = Properties()
-val keyPropsFileInAndroid = rootProject.file("android/key.properties")
-val keyPropsFileInRoot = rootProject.file("key.properties")
-
-if (keyPropsFileInAndroid.exists()) {
-    keystoreProperties.load(FileInputStream(keyPropsFileInAndroid))
-} else if (keyPropsFileInRoot.exists()) {
-    keystoreProperties.load(FileInputStream(keyPropsFileInRoot))
-}
-
 android {
     namespace = "com.example.flowfix_game"
     compileSdk = flutter.compileSdkVersion
@@ -37,22 +27,20 @@ android {
         }
     }
 
-   signingConfigs {
-    create("release") {
-        val keystorePropertiesFile = rootProject.file("android/app/key.properties")
-        if (keystorePropertiesFile.exists()) {
-            val properties = java.util.Properties()
-            properties.load(java.io.FileInputStream(keystorePropertiesFile))
-            
-            keyAlias = properties.getProperty("keyAlias")
-            keyPassword = properties.getProperty("keyPassword")
-            storePassword = properties.getProperty("storePassword")
-            
-            // সরাসরি android/app ফোল্ডার থেকে কি-স্টোর ফাইলটি নির্ধারণ করে দেওয়া
-            storeFile = file("mindora-release-key.jks")
+    signingConfigs {
+        create("release") {
+            val keystorePropertiesFile = rootProject.file("android/app/key.properties")
+            if (keystorePropertiesFile.exists()) {
+                val properties = Properties()
+                properties.load(FileInputStream(keystorePropertiesFile))
+                
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+                storePassword = properties.getProperty("storePassword")
+                storeFile = file("android/app/mindora-release-key.jks")
+            }
         }
     }
-}
 
     defaultConfig {
         applicationId = "com.example.flowfix_game"
