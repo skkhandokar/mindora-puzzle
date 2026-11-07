@@ -1,103 +1,50 @@
-# name: Build Flutter AAB
-
-# on:
-#   push:
-#     branches: [ main ]
-
-# jobs:
-#   build:
-#     name: Build Android App Bundle
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
-
-#       - name: Set up Java
-#         uses: actions/setup-java@v5
-#         with:
-#           distribution: 'zulu'
-#           java-version: '17'
-
-#       - name: Set up Flutter
-#         uses: subosito/flutter-action@v2
-#         with:
-#           flutter-version: '3.x'
-#           channel: 'stable'
-
-#       - name: Install Dependencies
-#         run: flutter pub get
-
-#       - name: Create key.properties from Secrets
-#         run: |
-#           # লোকাল স্থায়ী কি-স্টোর ব্যবহারের জন্য শুধু key.properties ফাইলটি জেনারেট করা হবে
-#           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/app/key.properties
-#           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
-#           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/key.properties
-#           echo "storeFile=mindora-release-key.jks" >> android/app/key.properties
-
-#       - name: Build App Bundle (.aab)
-#         run: flutter build appbundle --release
-
-#       - name: Upload AAB Artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: release-aab
-#           path: build/app/outputs/bundle/release/app-release.aab
-
-
-
-name: Flutter Build Release AAB
+name: Build Flutter AAB
 
 on:
   push:
-    branches:
-      - main # আপনার মেইন ব্রাঞ্চের নাম যদি master হয়, তবে এখানে master লিখে দেবেন
+    branches: [ main ]
 
 jobs:
   build:
+    name: Build Android App Bundle
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4.7.0
+      - name: Set up Java
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.x'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: flutter pub get
 
-      - name: Decode Keystore
+      - name: Decode Keystore from Secrets
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/mindora-release-key.jks
+          # GitHub secret theke Base64 string decode kore mindora-release-key.jks file banano
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/mindora-release-key.jks
 
-      - name: Create key.properties
+      - name: Create key.properties from Secrets
         run: |
-          cat <<EOF > android/key.properties
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          storeFile=mindora-release-key.jks
-          storePassword=${{ secrets.STORE_PASSWORD }}
-          EOF
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/app/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/key.properties
+          echo "storeFile=mindora-release-key.jks" >> android/app/key.properties
 
-      - name: Build AAB
-        env:
-          GRADLE_OPTS: "-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      - name: Build App Bundle (.aab)
         run: flutter build appbundle --release --android-skip-build-dependency-validation
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4.6.1
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: release-aab
           path: build/app/outputs/bundle/release/app-release.aab
-
-          
