@@ -28,12 +28,9 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Generate Keystore and key.properties
+      - name: Create key.properties from Secrets
         run: |
-          # সরাসরি GitHub Actions-এর ভেতরেই ফ্রেশ রিলিজ কি-স্টোর জেনারেট করা
-          keytool -genkey -v -keystore android/app/mindora-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias ${{ secrets.KEY_ALIAS }} -keypass ${{ secrets.KEY_PASSWORD }} -storepass ${{ secrets.STORE_PASSWORD }} -dname "CN=Android, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=US"
-          
-          # key.properties ফাইল তৈরি করা
+          # লোকাল স্থায়ী কি-স্টোর ব্যবহারের জন্য শুধু key.properties ফাইলটি জেনারেট করা হবে
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/app/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/key.properties
@@ -46,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-aab
-          path: build/app/outputs/bundle/release/app-release.aab 
+          path: build/app/outputs/bundle/release/app-release.aab
