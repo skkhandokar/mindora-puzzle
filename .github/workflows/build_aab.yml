@@ -28,7 +28,7 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Create key.properties from Secrets
+      - name: Create key.properties directly
         run: |
           echo "storePassword=Kibolle2mi" > android/app/key.properties
           echo "keyPassword=Kibolle2mi" >> android/app/key.properties
@@ -39,7 +39,7 @@ jobs:
         run: flutter build appbundle --release --android-skip-build-dependency-validation
 
       - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
+        uses: upload/upload-artifact@v4 # অথবা আপনার আগের আপলোড অ্যাকশন
         with:
           name: release-aab
           path: build/app/outputs/bundle/release/app-release.aab
