@@ -1,4 +1,4 @@
-package com.skkhandokar.mindora
+package com.skkhandokar.mindoraa
 
 import io.flutter.embedding.android.FlutterActivity
 

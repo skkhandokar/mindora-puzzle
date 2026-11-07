@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.skkhandokar.mindora"
+    namespace = "com.skkhandokar.mindoraa"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -57,7 +57,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.skkhandokar.mindora"
+        applicationId = "com.skkhandokar.mindoraa"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
